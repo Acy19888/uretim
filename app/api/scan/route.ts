@@ -23,6 +23,7 @@ Tüm bilgileri çıkar ve JSON formatında döndür.
 - İş Emri No: Sipariş numarası (fişin üst kısmında)
 - Sıra No: Sıra numarası
 - Tarih: Tarih
+- RAL Renk: Sayfanın en üstünde büyük yazılı 4 haneli RAL renk kodu (örn: 9005, 8019, 1013). Bu çok önemli — her sayfada bir tane olur.
 - Ürün Adı: Ürün adı (tablonun sol sütunu)
 - Miktar: Adet/miktar (tablonun sağ sütunu)
 
@@ -38,6 +39,7 @@ YALNIZCA şu JSON formatında yanıt ver (önünde/arkasında Markdown veya meti
   "is_emri_no": "...",
   "tarih": "...",
   "sira_no": "...",
+  "ral_renk": "9005",
   "items": [
     {"urun_adi": "...", "miktar": "..."},
     ...

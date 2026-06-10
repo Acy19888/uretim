@@ -45,6 +45,7 @@ export default function Home() {
   const [isEmriNo, setIsEmriNo]              = useState("");
   const [tarih, setTarih]                    = useState(bugunStr());
 
+  const [ralRenk, setRalRenk]               = useState("");
   const [taramaKonusu, setTaramaKonusu]     = useState<ScanResult | null>(null);
   const [mevcutIndex, setMevcutIndex]        = useState(0);
   const [sayfaOnaylananlar, setSayfaOnaylananlar] = useState<ConfirmedItem[]>([]);
@@ -82,6 +83,7 @@ export default function Home() {
       if (!sonuc.items?.length) throw new Error("Hiçbir ürün algılanamadı. Lütfen tekrar deneyin.");
       if (!isEmriNo && sonuc.is_emri_no) setIsEmriNo(sonuc.is_emri_no);
       if (sonuc.tarih) setTarih(sonuc.tarih);
+      if (sonuc.ral_renk) setRalRenk(sonuc.ral_renk);
       setTaramaKonusu(sonuc);
       setMevcutIndex(0);
       setSayfaOnaylananlar([]);
@@ -94,10 +96,12 @@ export default function Home() {
     setDuzenMiktar(urun.miktar || "");
     setStokArama(urun.urun_adi || "");
     setDuzenlemeAcik(false);
-    const eslesimler = findMatches(urun.urun_adi, stokData, 5);
+    // RAL rengi ile birlikte ara: "9005 Monaka Bosma"
+    const aramaMetni = ralRenk ? `${ralRenk} ${urun.urun_adi}` : urun.urun_adi;
+    const eslesimler = findMatches(aramaMetni, stokData, 5);
     setStokOneriler(eslesimler);
     setDuzenStok(eslesimler[0] || null);
-  }, [stokData]);
+  }, [stokData, ralRenk]);
 
   useEffect(() => {
     if (adim === "confirm" && taramaKonusu && mevcutIndex < taramaKonusu.items.length)
@@ -278,7 +282,7 @@ export default function Home() {
           <div className="bg-white rounded-3xl shadow-md p-4">
             <div className="flex justify-between text-sm text-gray-500 mb-2">
               <span className="font-bold text-gray-700">{mevcutIndex + 1}. Satır / {toplamUrun}</span>
-              <span>{isEmriNo && `İş Emri: ${isEmriNo}`}</span>
+              <span>{ralRenk && <span className="bg-gray-800 text-white px-2 py-0.5 rounded-lg text-xs font-mono mr-2">RAL {ralRenk}</span>}{isEmriNo && `İş Emri: ${isEmriNo}`}</span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-3">
               <div className="bg-blue-700 h-3 rounded-full transition-all"

@@ -22,6 +22,7 @@ export interface ScanResult {
   is_emri_no: string;
   tarih: string;
   sira_no: string;
+  ral_renk?: string;
   items: ScannedItem[];
 }
 
