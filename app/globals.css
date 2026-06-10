@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 248, 250, 252;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+}
+
+@layer utilities {
+  .btn-primary {
+    @apply bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
+  }
+  .btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
+  }
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
+  }
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-md p-6;
+  }
+}
