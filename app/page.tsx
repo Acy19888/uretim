@@ -43,6 +43,21 @@ function IconRefresh() {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+/** Parst Mengenangaben wie "1848 + 1900" → 3748, oder "280" → 280 */
+function parseMiktar(raw: string | number | undefined): string {
+  if (raw === undefined || raw === null) return "";
+  const s = String(raw);
+  // Enthält "+"? → alle Zahlen addieren
+  if (s.includes("+")) {
+    const sum = s
+      .split("+")
+      .map(p => parseFloat(p.replace(/[^\d.,]/g, "").replace(",", ".")) || 0)
+      .reduce((a, b) => a + b, 0);
+    return sum % 1 === 0 ? String(sum) : sum.toFixed(2);
+  }
+  return s.trim();
+}
+
 function toBase64(file: File): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader();
@@ -105,6 +120,11 @@ export default function Home() {
       const sonuc: ScanResult = await res.json();
       if (!sonuc.items?.length) throw new Error("Hiçbir ürün algılanamadı.");
       if (sonuc.ral_renk) setRalRenk(sonuc.ral_renk);
+      // Miktar içinde "+" varsa topla (örn: "1848 + 1900" → "3748")
+      sonuc.items = sonuc.items.map(item => ({
+        ...item,
+        miktar: parseMiktar(item.miktar),
+      }));
       setTaramaKonusu(sonuc); setMevcutIndex(0); setSayfaOnaylananlar([]); setAdim("confirm");
     } catch (err) { setHata(String(err)); setAdim("scan"); }
   }
@@ -435,14 +455,33 @@ export default function Home() {
 
           {!duzenlemeAcik && (
             <div className="grid grid-cols-2 gap-3">
+              {/* ATLA — weißer Premium-Button */}
               <button onClick={atla}
-                className="bg-white border-2 border-gray-200 text-gray-600 font-bold py-6 rounded-3xl text-xl active:bg-gray-50">
-                ⏭ Atla
+                className="group relative overflow-hidden bg-white rounded-3xl shadow-sm border border-gray-200 active:scale-95 transition-transform">
+                <div className="absolute inset-0 bg-gray-50 opacity-0 group-active:opacity-100 transition-opacity" />
+                <div className="relative flex flex-col items-center justify-center gap-2 py-7 px-4">
+                  <div className="w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+                    </svg>
+                  </div>
+                  <span className="font-bold text-gray-600 text-base">Atla</span>
+                </div>
               </button>
+
+              {/* EVET — grüner Premium-Button */}
               <button onClick={onayla}
-                className="text-white font-bold py-6 rounded-3xl text-2xl shadow-lg active:opacity-90"
-                style={{ background: "#16a34a" }}>
-                ✅ Evet
+                className="group relative overflow-hidden rounded-3xl shadow-md active:scale-95 transition-transform"
+                style={{ background: "linear-gradient(145deg, #16a34a, #15803d)" }}>
+                <div className="absolute inset-0 bg-white opacity-0 group-active:opacity-10 transition-opacity" />
+                <div className="relative flex flex-col items-center justify-center gap-2 py-7 px-4">
+                  <div className="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <span className="font-bold text-white text-base">Onayla</span>
+                </div>
               </button>
             </div>
           )}

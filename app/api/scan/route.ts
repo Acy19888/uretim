@@ -29,10 +29,10 @@ Tüm bilgileri çıkar ve JSON formatında döndür.
 
 **Kurallar:**
 - Tüm doldurulmuş satırları oku
-- Bir satırda birden fazla sayı varsa son/en büyüğü toplam miktar olarak al
 - Boş satırları atla
 - El yazısı okunması zor olabilir - elinden gelenin en iyisini yap
-- Sayılar "1192" veya "280" gibi kombinasyonlar halinde olabilir
+- Miktar sütununda "+" işareti varsa (örn: "1848 + 1900") tüm sayıları topla ve tek bir sayı olarak yaz (örn: "3748")
+- Miktar sütununda birden fazla sayı ama "+" yoksa en büyük sayıyı al
 
 YALNIZCA şu JSON formatında yanıt ver (önünde/arkasında Markdown veya metin olmasın):
 {
