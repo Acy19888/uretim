@@ -27,12 +27,21 @@ Tüm bilgileri çıkar ve JSON formatında döndür.
 - Ürün Adı: Ürün adı (tablonun sol sütunu)
 - Miktar: Adet/miktar (tablonun sağ sütunu)
 
-**Kurallar:**
+**Miktar Sütunları Hakkında ÇOK ÖNEMLİ:**
+- Bu fişte "MİKTAR", "MİKTAR", "MİKTAR", "TOP. MİK." şeklinde birden fazla miktar sütunu var
+- Bir satırda birden fazla miktar sütununa değer yazılmış olabilir (örn: birinci sütunda "560", ikinci sütunda "468")
+- Aynı satırın birden fazla miktar sütununda değer varsa veya "+" işareti varsa → HEPSİNİ TOPLA
+- Örnekler:
+  - "1848" ve "1900" aynı satırda (farklı sütunlarda veya "+" ile) → miktar: "3748"
+  - "560" ve "468" aynı satırda → miktar: "1028"
+  - Sadece tek sütunda "5712" → miktar: "5712"
+- "TOP. MİK." sütununda zaten toplam yazılıysa onu kullan
+- Aksi hâlde tüm miktar sütunlarını kendin topla
+
+**Diğer Kurallar:**
 - Tüm doldurulmuş satırları oku
 - Boş satırları atla
 - El yazısı okunması zor olabilir - elinden gelenin en iyisini yap
-- Miktar sütununda "+" işareti varsa (örn: "1848 + 1900") tüm sayıları topla ve tek bir sayı olarak yaz (örn: "3748")
-- Miktar sütununda birden fazla sayı ama "+" yoksa en büyük sayıyı al
 
 YALNIZCA şu JSON formatında yanıt ver (önünde/arkasında Markdown veya metin olmasın):
 {
