@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       "Fiş No.(*)":      fisNo,
       "Tarih":           tarih,
       "Belge Tipi":      "",
-      "İş Emri/Sip.":   is_emri_no,
+      "İş Emri/Sip.":   "",
       "Sipariş Kale":    "",
       "Depo Öncel":      "",
       "L. Depo(*)":      "500",

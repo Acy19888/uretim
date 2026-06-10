@@ -81,8 +81,6 @@ export default function Home() {
       if (!res.ok) throw new Error((await res.json()).error || "Tarama başarısız");
       const sonuc: ScanResult = await res.json();
       if (!sonuc.items?.length) throw new Error("Hiçbir ürün algılanamadı. Lütfen tekrar deneyin.");
-      if (!isEmriNo && sonuc.is_emri_no) setIsEmriNo(sonuc.is_emri_no);
-      if (sonuc.tarih) setTarih(sonuc.tarih);
       if (sonuc.ral_renk) setRalRenk(sonuc.ral_renk);
       setTaramaKonusu(sonuc);
       setMevcutIndex(0);
