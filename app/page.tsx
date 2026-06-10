@@ -492,73 +492,149 @@ export default function Home() {
       {adim === "more_pages" && (
         <div className="bg-white rounded-3xl shadow-md overflow-hidden">
           <div className="h-1.5" style={{ background: wfBlue }} />
-          <div className="p-8 flex flex-col items-center text-center gap-5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/windoform-logo.png" alt="WINDOFORM" className="h-8 object-contain opacity-70" />
+          <div className="px-6 py-8 flex flex-col items-center text-center gap-6">
+            {/* Logo in weißer Pille */}
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/windoform-logo.png" alt="WINDOFORM" className="h-7 object-contain" />
+            </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Başka Sayfa Var Mı?</h2>
-              <p className="text-gray-400 mt-1 text-sm">{tumOnaylananlar.filter(i => !i.skipped).length} ürün onaylandı</p>
+              <p className="text-gray-400 mt-1.5 text-sm">
+                Şu ana kadar <span className="font-bold" style={{ color: wfBlue }}>{tumOnaylananlar.filter(i => !i.skipped).length}</span> ürün onaylandı
+              </p>
             </div>
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <button onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setAdim("scan"); }}
-                className="text-white font-bold py-7 rounded-3xl text-2xl shadow-lg active:opacity-90"
-                style={{ background: "#16a34a" }}>
-                ✅ Evet
+            <div className="grid grid-cols-2 gap-3 w-full">
+              {/* Evet */}
+              <button
+                onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setAdim("scan"); }}
+                className="group relative overflow-hidden rounded-3xl shadow-md active:scale-95 transition-transform"
+                style={{ background: "linear-gradient(145deg, #16a34a, #15803d)" }}>
+                <div className="flex flex-col items-center justify-center gap-2.5 py-7 px-4">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <span className="font-bold text-white text-base">Evet, Devam</span>
+                </div>
               </button>
-              <button onClick={() => setAdim("done")}
-                className="text-white font-bold py-7 rounded-3xl text-2xl shadow-lg active:opacity-90"
-                style={{ background: "#dc2626" }}>
-                ❌ Hayır
+              {/* Hayır */}
+              <button
+                onClick={() => setAdim("done")}
+                className="group relative overflow-hidden rounded-3xl shadow-md active:scale-95 transition-transform bg-white border-2 border-gray-200">
+                <div className="flex flex-col items-center justify-center gap-2.5 py-7 px-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                  </div>
+                  <span className="font-bold text-gray-700 text-base">Bitir</span>
+                </div>
               </button>
             </div>
-            <p className="text-gray-300 text-xs">Hayır → Excel oluşturulur</p>
+            <p className="text-gray-300 text-xs">"Bitir" seçince Excel hazırlanır</p>
           </div>
         </div>
       )}
 
       {/* ── TAMAMLANDI ──────────────────────────────────────────────────── */}
       {adim === "done" && (
-        <div className="space-y-4">
+        <div className="space-y-3">
+
+          {/* Hero-Karte — Logo in weißer Pille, kein Filter */}
           <div className="rounded-3xl overflow-hidden shadow-lg"
             style={{ background: `linear-gradient(135deg, ${wfBlue} 0%, #1e3d6e 100%)` }}>
-            <div className="p-8 flex flex-col items-center text-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/windoform-logo.png" alt="WINDOFORM"
-                className="h-8 object-contain"
-                style={{ filter: "brightness(0) invert(1)" }} />
+            <div className="px-6 pt-7 pb-8 flex flex-col items-center text-center gap-5">
+              {/* Logo in weißer Pille */}
+              <div className="bg-white rounded-xl px-4 py-2 shadow-sm">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/windoform-logo.png" alt="WINDOFORM" className="h-6 object-contain" />
+              </div>
               <div>
-                <p className="text-white/70 text-sm uppercase tracking-widest font-medium">Tamamlandı</p>
-                <p className="text-white text-4xl font-black mt-1">{onaylananSayisi} Ürün</p>
-                <p className="text-white/60 text-sm mt-1">{tarih}</p>
+                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">Tamamlandı</p>
+                <p className="text-white font-black mt-1" style={{ fontSize: "clamp(2.5rem,10vw,3.5rem)", lineHeight: 1 }}>
+                  {onaylananSayisi}
+                </p>
+                <p className="text-white/80 text-lg font-medium mt-0.5">Ürün Onaylandı</p>
+                <p className="text-white/50 text-sm mt-2">{tarih}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-sm p-5 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Onaylanan Ürünler</p>
-            <div className="space-y-1.5 max-h-64 overflow-y-auto">
+          {/* Ürün listesi */}
+          <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+            <div className="px-5 pt-4 pb-2">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Onaylanan Ürünler</p>
+            </div>
+            <div className="divide-y divide-gray-50 max-h-72 overflow-y-auto">
               {tumOnaylananlar.map((u, idx) => (
                 <div key={idx}
-                  className={`flex items-center gap-3 p-3 rounded-2xl ${u.skipped ? "bg-gray-50 text-gray-400" : "bg-blue-50"}`}>
-                  <span className="text-sm">{u.skipped ? "⏭" : "✅"}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate text-sm">{u.confirmed_stok?.stok_adi || u.original_urun_adi}</p>
-                    {u.confirmed_stok && <p className="text-xs font-mono text-gray-400">{u.confirmed_stok.stok_kodu}</p>}
+                  className={`flex items-center gap-3 px-5 py-3.5 ${u.skipped ? "opacity-40" : ""}`}>
+                  {/* İkon */}
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    u.skipped ? "bg-gray-100" : "bg-green-50"}`}>
+                    {u.skipped ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+                      </svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
                   </div>
-                  {!u.skipped && <span className="font-bold text-base whitespace-nowrap" style={{ color: wfBlue }}>{u.confirmed_miktar}</span>}
+                  {/* Metin */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-900 truncate leading-tight">
+                      {u.confirmed_stok?.stok_adi || u.original_urun_adi}
+                    </p>
+                    {u.confirmed_stok && (
+                      <p className="text-[11px] font-mono text-gray-400 mt-0.5">{u.confirmed_stok.stok_kodu}</p>
+                    )}
+                  </div>
+                  {/* Miktar */}
+                  {!u.skipped && (
+                    <span className="font-black text-lg flex-shrink-0" style={{ color: wfBlue }}>
+                      {u.confirmed_miktar}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Excel İndir — Premium blauer Button */}
           <button onClick={excelIndir}
-            className="w-full text-white font-bold py-6 rounded-3xl text-xl shadow-xl active:opacity-90"
-            style={{ background: wfBlue }}>
-            📥 Excel İndir
+            className="w-full relative overflow-hidden rounded-3xl shadow-lg active:scale-95 transition-transform"
+            style={{ background: `linear-gradient(145deg, ${wfBlue}, #1e3d6e)` }}>
+            <div className="flex items-center justify-center gap-3 py-5 px-6">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </div>
+              <div className="text-left">
+                <p className="text-white font-bold text-lg leading-tight">Excel İndir</p>
+                <p className="text-white/60 text-xs">Boş Üsk formatında</p>
+              </div>
+            </div>
           </button>
+
+          {/* Yeni Fiş — weißer Button */}
           <button onClick={yenidenBaslat}
-            className="w-full bg-white border border-gray-200 text-gray-500 font-bold py-4 rounded-3xl text-base shadow-sm active:bg-gray-50">
-            🔄 Yeni Fiş Tara
+            className="w-full bg-white border border-gray-200 rounded-3xl shadow-sm active:bg-gray-50 active:scale-95 transition-transform">
+            <div className="flex items-center justify-center gap-3 py-4 px-6">
+              <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+              </div>
+              <span className="font-bold text-gray-600 text-base">Yeni Fiş Tara</span>
+            </div>
           </button>
         </div>
       )}
