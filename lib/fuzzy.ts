@@ -32,19 +32,31 @@ function scoreMatch(query: string, stokAdi: string, stokKodu: string): number {
 
   if (queryTokens.length === 0) return 0;
 
-  let score = 0;
+  let matchedScore = 0;
+  let matchedTokenCount = 0;
+
   for (const qt of queryTokens) {
+    let bestForToken = 0;
     for (const st of adiTokens) {
-      if (st === qt)                          score += qt.length * 3;
-      else if (st.startsWith(qt) || qt.startsWith(st)) score += Math.min(qt.length, st.length) * 2;
-      else if (st.includes(qt) || qt.includes(st))     score += Math.min(qt.length, st.length);
+      let s = 0;
+      if (st === qt)                                    s = qt.length * 3;
+      else if (st.startsWith(qt) || qt.startsWith(st)) s = Math.min(qt.length, st.length) * 2;
+      else if (st.includes(qt) || qt.includes(st))     s = Math.min(qt.length, st.length);
+      if (s > bestForToken) bestForToken = s;
     }
+    if (bestForToken > 0) matchedTokenCount++;
+    matchedScore += bestForToken;
   }
 
-  // Bonus: tüm query ürün adında geçiyorsa
-  if (normAdi.includes(normQuery)) score += normQuery.length * 2;
+  // Bonus: tüm query ürün adında birebir geçiyorsa
+  if (normAdi.includes(normQuery)) matchedScore += normQuery.length * 2;
 
-  return score;
+  // Kesinlik bonusu: sorgu tokenları ürün tokenlarının büyük bölümünü kapsıyorsa
+  // (örn: "EGE AKUSTIK" sorgusu için 6 tokenli JUMBO ürün yerine 5 tokenli sade ürün öne çıkar)
+  const precision = matchedTokenCount / adiTokens.length;
+  matchedScore = matchedScore * (1 + precision * 0.5);
+
+  return matchedScore;
 }
 
 // Return top N matches for a query against the stok list

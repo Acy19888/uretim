@@ -158,7 +158,7 @@ export default function Home() {
   }
   function stokAramaGuncelle(q: string) {
     setStokArama(q);
-    setStokOneriler(q.length >= 1 ? findMatches(q, stokData, 20) : []);
+    setStokOneriler(q.length >= 1 ? findMatches(q, stokData, 50) : []);
   }
   async function stokGuncelle(e: React.ChangeEvent<HTMLInputElement>) {
     const dosya = e.target.files?.[0]; if (!dosya) return;
