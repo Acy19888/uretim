@@ -157,7 +157,8 @@ export default function Home() {
     else { setTumOnaylananlar(prev => [...prev, ...g]); setAdim("more_pages"); }
   }
   function stokAramaGuncelle(q: string) {
-    setStokArama(q); setStokOneriler(q.length >= 2 ? findMatches(q, stokData, 8) : []);
+    setStokArama(q);
+    setStokOneriler(q.length >= 1 ? findMatches(q, stokData, 20) : []);
   }
   async function stokGuncelle(e: React.ChangeEvent<HTMLInputElement>) {
     const dosya = e.target.files?.[0]; if (!dosya) return;
