@@ -3,29 +3,60 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 248, 250, 252;
+  --wf-blue: #2B5597;
+  --wf-blue-dark: #1e3d6e;
+  --wf-blue-light: #3a6bb5;
+  --wf-gray: #A7A9AC;
+  --wf-bg: #EEF2F8;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  background: var(--wf-bg);
+  color: #1a2a3a;
 }
 
+/* Loading W animation */
+@keyframes wPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.88); opacity: 0.55; }
+}
+@keyframes wBuildLeft {
+  0% { opacity: 0; transform: translateX(-12px) translateY(8px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
+}
+@keyframes wBuildCenter {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes wBuildRight {
+  0% { opacity: 0; transform: translateX(12px) translateY(8px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
+}
+@keyframes fadeSlideUp {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.wf-logo-left   { animation: wBuildLeft   0.5s ease-out both; }
+.wf-logo-center { animation: wBuildCenter 0.5s ease-out 0.12s both; }
+.wf-logo-right  { animation: wBuildRight  0.5s ease-out 0.24s both; }
+.wf-logo-pulse  { animation: wPulse 2s ease-in-out infinite; }
+.wf-fade-up     { animation: fadeSlideUp 0.4s ease-out both; }
+.wf-fade-up-2   { animation: fadeSlideUp 0.4s ease-out 0.15s both; }
+.wf-fade-up-3   { animation: fadeSlideUp 0.4s ease-out 0.3s both; }
+
 @layer utilities {
-  .btn-primary {
-    @apply bg-blue-700 hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
+  .btn-wf {
+    @apply text-white font-bold rounded-2xl transition-all active:scale-95;
+    background-color: var(--wf-blue);
   }
-  .btn-success {
-    @apply bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
-  }
-  .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
-  }
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-6 rounded-xl text-lg transition-colors active:scale-95;
-  }
-  .card {
-    @apply bg-white rounded-2xl shadow-md p-6;
+  .btn-wf:hover { background-color: var(--wf-blue-dark); }
+
+  .card-wf {
+    @apply bg-white rounded-3xl shadow-sm border border-white/60 p-5;
   }
 }
