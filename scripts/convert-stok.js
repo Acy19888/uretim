@@ -1,6 +1,6 @@
 /**
- * Einmaliges Script: Stok Kart Kayıtları.xlsx → lib/stokData.json
- * Ausführen mit: node scripts/convert-stok.js
+ * Tek seferlik script: Stok Kart Kayıtları.xlsx → lib/stokData.json
+ * Çalıştır: node scripts/convert-stok.js
  */
 const XLSX = require('xlsx');
 const fs   = require('fs');
@@ -10,7 +10,7 @@ const excelPath = path.join(__dirname, '..', 'Stok Kart Kayıtları.xlsx');
 const outPath   = path.join(__dirname, '..', 'lib', 'stokData.json');
 
 if (!fs.existsSync(excelPath)) {
-  console.error('❌ Datei nicht gefunden:', excelPath);
+  console.error('❌ Dosya bulunamadı:', excelPath);
   process.exit(1);
 }
 
@@ -27,4 +27,4 @@ for (const row of rows) {
 }
 
 fs.writeFileSync(outPath, JSON.stringify(items));
-console.log(`✅ ${items.length} Produkte gespeichert → lib/stokData.json`);
+console.log(`✅ ${items.length} ürün kaydedildi → lib/stokData.json`);

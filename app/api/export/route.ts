@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Export fehlgeschlagen";
+    const message = error instanceof Error ? error.message : "Dışa aktarma başarısız";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

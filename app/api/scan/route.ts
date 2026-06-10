@@ -10,30 +10,30 @@ export async function POST(req: NextRequest) {
     const { imageBase64, mimeType } = await req.json();
 
     if (!imageBase64) {
-      return NextResponse.json({ error: "Kein Bild erhalten" }, { status: 400 });
+      return NextResponse.json({ error: "Görsel alınamadı" }, { status: 400 });
     }
 
-    const prompt = `Du analysierst einen handgeschriebenen Produktionszettel einer Fenster/Tür-Fabrik (WINDOFORM).
+    const prompt = `Bir pencere/kapı fabrikasına (WINDOFORM) ait el yazısıyla doldurulmuş üretim fişini analiz ediyorsun.
 
-Der Zettel ist ein "Yarı Mamul Giriş ve Çıkış Defteri" (Halbfertigware Ein-/Ausgangsbuch).
+Fiş, bir "Yarı Mamul Giriş ve Çıkış Defteri" sayfasıdır.
 
-Extrahiere alle Informationen und gib sie als JSON zurück.
+Tüm bilgileri çıkar ve JSON formatında döndür.
 
-**Wichtige Spalten:**
-- İş Emri No: Die Auftragsnummer (oben auf dem Zettel)
-- Sıra No: Die Laufende Nummer
-- Tarih: Das Datum
-- Ürün Adı: Der Produktname (linke Spalte in der Tabelle)
-- Miktar: Die Stückzahl/Menge (rechte Spalte(n) in der Tabelle)
+**Önemli Sütunlar:**
+- İş Emri No: Sipariş numarası (fişin üst kısmında)
+- Sıra No: Sıra numarası
+- Tarih: Tarih
+- Ürün Adı: Ürün adı (tablonun sol sütunu)
+- Miktar: Adet/miktar (tablonun sağ sütunu)
 
-**Regeln:**
-- Lies alle beschriebenen Zeilen
-- Falls eine Zeile mehrere Zahlen hat, nimm die letzte/größte als Gesamtmenge
-- Leere Zeilen überspringen
-- Handschrift kann schwer lesbar sein - gib dein Bestes
-- Zahlen können auch als Kombinationen stehen wie "1192" oder "280"
+**Kurallar:**
+- Tüm doldurulmuş satırları oku
+- Bir satırda birden fazla sayı varsa son/en büyüğü toplam miktar olarak al
+- Boş satırları atla
+- El yazısı okunması zor olabilir - elinden gelenin en iyisini yap
+- Sayılar "1192" veya "280" gibi kombinasyonlar halinde olabilir
 
-Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
+YALNIZCA şu JSON formatında yanıt ver (önünde/arkasında Markdown veya metin olmasın):
 {
   "is_emri_no": "...",
   "tarih": "...",
@@ -82,7 +82,7 @@ Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
     } catch {
       console.error("JSON parse error:", cleaned);
       return NextResponse.json(
-        { error: "KI konnte den Zettel nicht lesen. Bitte erneut versuchen." },
+        { error: "Yapay zeka fişi okuyamadı. Lütfen tekrar deneyin." },
         { status: 422 }
       );
     }
@@ -91,7 +91,7 @@ Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
   } catch (error: unknown) {
     console.error("Scan error:", error);
     const message =
-      error instanceof Error ? error.message : "Unbekannter Fehler";
+      error instanceof Error ? error.message : "Bilinmeyen hata";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
