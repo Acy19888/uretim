@@ -8,84 +8,41 @@ import bundledStok from "@/lib/stokData.json";
 
 type Step = "scan" | "processing" | "confirm" | "more_pages" | "done" | "update";
 
-// ── WINDOFORM W-mark SVG ───────────────────────────────────────────────────
-function WMark({
-  size = 56,
-  color = "#2B5597",
-  animated = false,
-}: {
-  size?: number;
-  color?: string;
-  animated?: boolean;
-}) {
-  const w = Math.round(size * 1.17);
+// ── SVG Icons ─────────────────────────────────────────────────────────────
+function IconCamera() {
   return (
-    <svg width={w} height={size} viewBox="0 0 56 48" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={animated ? "wf-logo-pulse" : ""}>
-      {/* Left arm */}
-      <path
-        className={animated ? "wf-logo-left" : ""}
-        d="M0,0 L7,0 L16,48 L7,48 Z"
-        fill={color}
-      />
-      {/* Left-center arm */}
-      <path
-        className={animated ? "wf-logo-left" : ""}
-        d="M7,0 L20,0 L16,48 L3,48 Z"
-        fill={color} opacity="0.9"
-      />
-      {/* Center peak */}
-      <path
-        className={animated ? "wf-logo-center" : ""}
-        d="M0,0 L56,0 L47,48 L28,14 L9,48 L0,0 Z
-           M7,0 L28,36 L49,0 Z"
-        fill={color}
-        fillRule="evenodd"
-      />
-      {/* Right-center arm */}
-      <path
-        className={animated ? "wf-logo-right" : ""}
-        d="M36,0 L49,0 L53,48 L40,48 Z"
-        fill={color} opacity="0.9"
-      />
-      {/* Right arm */}
-      <path
-        className={animated ? "wf-logo-right" : ""}
-        d="M49,0 L56,0 L49,48 L40,48 Z"
-        fill={color}
-      />
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </svg>
+  );
+}
+function IconGallery() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  );
+}
+function IconChevron() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  );
+}
+function IconRefresh() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 4 23 10 17 10"/>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
     </svg>
   );
 }
 
-// Clean single-path W-mark
-function WMarkClean({
-  size = 56,
-  color = "#2B5597",
-  animated = false,
-  className = "",
-}: {
-  size?: number;
-  color?: string;
-  animated?: boolean;
-  className?: string;
-}) {
-  return (
-    <svg
-      width={Math.round(size * 1.17)}
-      height={size}
-      viewBox="0 0 56 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`${animated ? "wf-logo-pulse" : ""} ${className}`}
-    >
-      <path d="M0,0 L9,48 L28,12 L47,48 L56,0 L49,0 L28,36 L7,0 Z" fill={color} />
-      {/* inner W cutout to create the hollow W effect */}
-      <path d="M9,48 L14,48 L28,24 L42,48 L47,48 L28,12 Z" fill="var(--wf-bg, #EEF2F8)" />
-    </svg>
-  );
-}
-
+// ── Helpers ────────────────────────────────────────────────────────────────
 function toBase64(file: File): Promise<string> {
   return new Promise((res, rej) => {
     const r = new FileReader();
@@ -94,25 +51,23 @@ function toBase64(file: File): Promise<string> {
     r.onerror = rej;
   });
 }
-
-function bugunStr(): string {
+function bugunStr() {
   const d = new Date();
   return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`;
 }
-
 function stokYukle(): StokItem[] {
   const base = bundledStok as StokItem[];
   try {
     const raw = localStorage.getItem("stok_guncellemeler");
     if (!raw) return base;
-    const guncellemeler: StokItem[] = JSON.parse(raw);
+    const extra: StokItem[] = JSON.parse(raw);
     const map = new Map(base.map(i => [i.stok_kodu, i]));
-    for (const g of guncellemeler) map.set(g.stok_kodu, g);
+    for (const e of extra) map.set(e.stok_kodu, e);
     return Array.from(map.values());
   } catch { return base; }
 }
 
-// ── Component ─────────────────────────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────────────────────
 export default function Home() {
   const [adim, setAdim]                       = useState<Step>("scan");
   const [stokData, setStokData]               = useState<StokItem[]>([]);
@@ -134,7 +89,6 @@ export default function Home() {
 
   useEffect(() => { setStokData(stokYukle()); }, []);
 
-  // ── Tarama ──────────────────────────────────────────────────────────────
   async function gorselSec(e: React.ChangeEvent<HTMLInputElement>) {
     const dosya = e.target.files?.[0];
     if (!dosya) return;
@@ -144,30 +98,22 @@ export default function Home() {
     try {
       const b64 = await toBase64(dosya);
       const res = await fetch("/api/scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: b64, mimeType: dosya.type }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Tarama başarısız");
       const sonuc: ScanResult = await res.json();
-      if (!sonuc.items?.length) throw new Error("Hiçbir ürün algılanamadı. Tekrar deneyin.");
+      if (!sonuc.items?.length) throw new Error("Hiçbir ürün algılanamadı.");
       if (sonuc.ral_renk) setRalRenk(sonuc.ral_renk);
-      setTaramaKonusu(sonuc);
-      setMevcutIndex(0);
-      setSayfaOnaylananlar([]);
-      setAdim("confirm");
+      setTaramaKonusu(sonuc); setMevcutIndex(0); setSayfaOnaylananlar([]); setAdim("confirm");
     } catch (err) { setHata(String(err)); setAdim("scan"); }
   }
 
-  // ── Onay ────────────────────────────────────────────────────────────────
   const satirHazirla = useCallback((urun: ScannedItem) => {
-    setDuzenMiktar(urun.miktar || "");
-    setStokArama(urun.urun_adi || "");
-    setDuzenlemeAcik(false);
-    const aramaMetni = ralRenk ? `${ralRenk} ${urun.urun_adi}` : urun.urun_adi;
-    const eslesimler = findMatches(aramaMetni, stokData, 5);
-    setStokOneriler(eslesimler);
-    setDuzenStok(eslesimler[0] || null);
+    setDuzenMiktar(urun.miktar || ""); setStokArama(urun.urun_adi || ""); setDuzenlemeAcik(false);
+    const q = ralRenk ? `${ralRenk} ${urun.urun_adi}` : urun.urun_adi;
+    const e = findMatches(q, stokData, 5);
+    setStokOneriler(e); setDuzenStok(e[0] || null);
   }, [stokData, ralRenk]);
 
   useEffect(() => {
@@ -176,73 +122,52 @@ export default function Home() {
   }, [mevcutIndex, adim, taramaKonusu, satirHazirla]);
 
   function onayla() {
-    const urun = taramaKonusu!.items[mevcutIndex];
-    ilerle([...sayfaOnaylananlar, {
-      original_urun_adi: urun.urun_adi, original_miktar: urun.miktar,
-      confirmed_stok: duzenStok, confirmed_miktar: parseFloat(duzenMiktar.replace(",",".")) || 0,
-      skipped: false,
-    }]);
+    const u = taramaKonusu!.items[mevcutIndex];
+    ilerle([...sayfaOnaylananlar, { original_urun_adi: u.urun_adi, original_miktar: u.miktar,
+      confirmed_stok: duzenStok, confirmed_miktar: parseFloat(duzenMiktar.replace(",",".")) || 0, skipped: false }]);
   }
-
   function atla() {
-    const urun = taramaKonusu!.items[mevcutIndex];
-    ilerle([...sayfaOnaylananlar, {
-      original_urun_adi: urun.urun_adi, original_miktar: urun.miktar,
-      confirmed_stok: null, confirmed_miktar: 0, skipped: true,
-    }]);
+    const u = taramaKonusu!.items[mevcutIndex];
+    ilerle([...sayfaOnaylananlar, { original_urun_adi: u.urun_adi, original_miktar: u.miktar,
+      confirmed_stok: null, confirmed_miktar: 0, skipped: true }]);
   }
-
-  function ilerle(guncellenmis: ConfirmedItem[]) {
-    setSayfaOnaylananlar(guncellenmis);
-    if (mevcutIndex + 1 < taramaKonusu!.items.length) {
-      setMevcutIndex(mevcutIndex + 1);
-    } else {
-      setTumOnaylananlar(prev => [...prev, ...guncellenmis]);
-      setAdim("more_pages");
-    }
+  function ilerle(g: ConfirmedItem[]) {
+    setSayfaOnaylananlar(g);
+    if (mevcutIndex + 1 < taramaKonusu!.items.length) setMevcutIndex(mevcutIndex + 1);
+    else { setTumOnaylananlar(prev => [...prev, ...g]); setAdim("more_pages"); }
   }
-
   function stokAramaGuncelle(q: string) {
-    setStokArama(q);
-    setStokOneriler(q.length >= 2 ? findMatches(q, stokData, 8) : []);
+    setStokArama(q); setStokOneriler(q.length >= 2 ? findMatches(q, stokData, 8) : []);
   }
-
-  // ── Stok güncelle ───────────────────────────────────────────────────────
   async function stokGuncelle(e: React.ChangeEvent<HTMLInputElement>) {
-    const dosya = e.target.files?.[0];
-    if (!dosya) return;
+    const dosya = e.target.files?.[0]; if (!dosya) return;
     setGuncellemeMetni("Okunuyor...");
     try {
-      const buf   = await dosya.arrayBuffer();
-      const wb    = XLSX.read(buf, { type: "array" });
-      const ws    = wb.Sheets[wb.SheetNames[0]];
-      const satirlar = XLSX.utils.sheet_to_json<Record<string,string>>(ws, { raw: false, defval: "" });
-      const yeniUrunler: StokItem[] = satirlar.flatMap(satir => {
-        const kodu  = (satir["STOK_KODU"] || satir["Stok Kodu"] || "").trim();
-        const adi   = (satir["STOK_ADI"]  || satir["Stok Adı"]  || "").trim();
-        const cesit = (satir["Çeşit"] || "").trim();
-        if (!kodu || !adi) return [];
-        return [{ stok_kodu: kodu, stok_adi: adi, cesit }];
+      const buf = await dosya.arrayBuffer();
+      const wb  = XLSX.read(buf, { type: "array" });
+      const ws  = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string,string>>(ws, { raw: false, defval: "" });
+      const yeni: StokItem[] = rows.flatMap(r => {
+        const kodu = (r["STOK_KODU"]||r["Stok Kodu"]||"").trim();
+        const adi  = (r["STOK_ADI"] ||r["Stok Adı"] ||"").trim();
+        const cesit= (r["Çeşit"]||"").trim();
+        return kodu && adi ? [{ stok_kodu: kodu, stok_adi: adi, cesit }] : [];
       });
-      const mevcutKodlar = new Set((bundledStok as StokItem[]).map(i => i.stok_kodu));
-      const gercektenYeni = yeniUrunler.filter(i => !mevcutKodlar.has(i.stok_kodu));
-      const eskiRaw = localStorage.getItem("stok_guncellemeler");
-      const eski: StokItem[] = eskiRaw ? JSON.parse(eskiRaw) : [];
+      const mevcut = new Set((bundledStok as StokItem[]).map(i => i.stok_kodu));
+      const gercekYeni = yeni.filter(i => !mevcut.has(i.stok_kodu));
+      const eski: StokItem[] = JSON.parse(localStorage.getItem("stok_guncellemeler") || "[]");
       const map = new Map(eski.map(i => [i.stok_kodu, i]));
-      for (const y of gercektenYeni) map.set(y.stok_kodu, y);
+      for (const y of gercekYeni) map.set(y.stok_kodu, y);
       localStorage.setItem("stok_guncellemeler", JSON.stringify(Array.from(map.values())));
       setStokData(stokYukle());
-      setGuncellemeMetni(`✅ ${gercektenYeni.length} yeni ürün eklendi. Toplam: ${yeniUrunler.length}`);
-    } catch (err) { setGuncellemeMetni("❌ Hata: " + String(err)); }
+      setGuncellemeMetni(`✅ ${gercekYeni.length} yeni ürün eklendi.`);
+    } catch (err) { setGuncellemeMetni("❌ " + String(err)); }
   }
-
-  // ── Excel export ────────────────────────────────────────────────────────
   async function excelIndir() {
     setHata(null);
     try {
       const res = await fetch("/api/export", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_emri_no: isEmriNo, tarih, items: tumOnaylananlar }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -253,7 +178,6 @@ export default function Home() {
       URL.revokeObjectURL(url);
     } catch (err) { setHata("Dışa aktarma hatası: " + String(err)); }
   }
-
   function yenidenBaslat() {
     setTumOnaylananlar([]); setTaramaKonusu(null); setSayfaOnaylananlar([]);
     setMevcutIndex(0); setOnizlemeGorsel(null); setRalRenk(""); setAdim("scan");
@@ -262,108 +186,148 @@ export default function Home() {
   const mevcutUrun      = taramaKonusu?.items[mevcutIndex];
   const toplamUrun      = taramaKonusu?.items.length || 0;
   const onaylananSayisi = tumOnaylananlar.filter(i => !i.skipped).length;
+  const wfBlue          = "#2B5597";
 
-  // ── Styles ──────────────────────────────────────────────────────────────
-  const wfBlue     = "#2B5597";
-  const wfBlueDark = "#1e3d6e";
-
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4 pb-12">
 
       {/* Hata */}
       {hata && (
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex gap-3 items-start shadow-sm">
-          <span className="text-xl mt-0.5">⚠️</span>
-          <div className="flex-1 text-sm leading-relaxed">{hata}</div>
-          <button onClick={() => setHata(null)} className="text-red-300 text-xl font-bold leading-none">✕</button>
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl p-4 flex gap-3 items-start">
+          <span className="text-lg mt-0.5">⚠️</span>
+          <p className="flex-1 text-sm">{hata}</p>
+          <button onClick={() => setHata(null)} className="text-red-300 font-bold text-lg leading-none">✕</button>
         </div>
       )}
 
-      {/* ── TARAMA ────────────────────────────────────────────────────── */}
+      {/* ── TARAMA ──────────────────────────────────────────────────────── */}
       {adim === "scan" && (
         <div className="space-y-3 wf-fade-up">
-          {/* Üst bilgi kartı */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 flex justify-between items-center">
+
+          {/* Durum kartı */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 flex justify-between items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: wfBlue }}>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: wfBlue }}>
                 Yarı Mamul Çıkış
               </p>
               {tumOnaylananlar.length > 0 && (
-                <p className="text-sm text-green-600 font-medium mt-0.5">
+                <p className="text-sm font-medium mt-0.5" style={{ color: "#16a34a" }}>
                   ✓ {onaylananSayisi} ürün onaylandı
                 </p>
               )}
             </div>
             <div className="text-right">
-              <p className="text-xs text-gray-400">Stok</p>
+              <p className="text-[11px] text-gray-400 uppercase tracking-wider">Stok</p>
               <p className="text-lg font-bold" style={{ color: wfBlue }}>
                 {stokData.length.toLocaleString("tr-TR")}
               </p>
             </div>
           </div>
 
-          {/* Kamera butonu */}
-          <label className="block cursor-pointer">
-            <div
-              className="rounded-3xl p-10 text-center shadow-md active:opacity-90 transition-all"
-              style={{ background: `linear-gradient(135deg, ${wfBlue} 0%, ${wfBlueDark} 100%)` }}
-            >
-              <div className="text-6xl mb-3">📷</div>
-              <p className="text-white text-2xl font-bold tracking-wide">Kamera</p>
-              <p className="text-white/60 text-sm mt-1">Fotoğraf çek</p>
-            </div>
-            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={gorselSec} />
-          </label>
+          {/* ── Kamera & Galeri — eşit boyutlu, premium ── */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Kamera */}
+            <label className="block cursor-pointer btn-press">
+              <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden
+                              active:shadow-md active:border-blue-200 transition-all h-full">
+                {/* Renkli üst şerit */}
+                <div className="h-1.5 w-full" style={{ background: wfBlue }} />
+                <div className="flex flex-col items-center justify-center gap-3 py-8 px-4">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm"
+                    style={{ background: `linear-gradient(145deg, #2B5597, #1e3d6e)` }}>
+                    <span style={{ color: "white" }}><IconCamera /></span>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-gray-900 text-base">Kamera</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Fotoğraf çek</p>
+                  </div>
+                </div>
+              </div>
+              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={gorselSec} />
+            </label>
 
-          {/* Galeriden seç */}
-          <label className="block cursor-pointer">
-            <div className="bg-white border border-gray-200 rounded-3xl p-7 text-center active:bg-gray-50 transition-all shadow-sm">
-              <div className="text-4xl mb-2">🖼️</div>
-              <p className="text-base font-bold text-gray-700">Galeriden Seç</p>
-            </div>
-            <input type="file" accept="image/*" className="hidden" onChange={gorselSec} />
-          </label>
+            {/* Galeri */}
+            <label className="block cursor-pointer btn-press">
+              <div className="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden
+                              active:shadow-md active:border-blue-200 transition-all h-full">
+                {/* Renkli üst şerit */}
+                <div className="h-1.5 w-full" style={{ background: "#A7A9AC" }} />
+                <div className="flex flex-col items-center justify-center gap-3 py-8 px-4">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm"
+                    style={{ background: "linear-gradient(145deg, #6b7280, #4b5563)" }}>
+                    <span style={{ color: "white" }}><IconGallery /></span>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-gray-900 text-base">Galeri</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Fotoğraf seç</p>
+                  </div>
+                </div>
+              </div>
+              <input type="file" accept="image/*" className="hidden" onChange={gorselSec} />
+            </label>
+          </div>
 
           {/* Güncelle */}
-          <button
-            onClick={() => { setAdim("update"); setGuncellemeMetni(null); }}
-            className="w-full bg-white border border-gray-200 text-gray-400 font-medium py-4 rounded-2xl text-sm shadow-sm active:bg-gray-50"
-          >
-            🔄 Stok Kartını Güncelle
+          <button onClick={() => { setAdim("update"); setGuncellemeMetni(null); }}
+            className="w-full bg-white border border-gray-200 rounded-2xl py-4 flex items-center justify-between px-5 shadow-sm active:bg-gray-50">
+            <div className="flex items-center gap-2 text-gray-500">
+              <IconRefresh />
+              <span className="text-sm font-medium">Stok Kartını Güncelle</span>
+            </div>
+            <IconChevron />
           </button>
         </div>
       )}
 
-      {/* ── İŞLENİYOR ──────────────────────────────────────────────────── */}
+      {/* ── İŞLENİYOR — Animasyonlu WINDOFORM Logo ─────────────────────── */}
       {adim === "processing" && (
-        <div className="bg-white rounded-3xl shadow-md p-10 text-center space-y-8">
-          {onizlemeGorsel && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={onizlemeGorsel} alt="" className="max-h-52 mx-auto rounded-2xl shadow object-contain" />
-          )}
+        <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+          {/* Mavi üst bant */}
+          <div className="h-1.5 w-full" style={{ background: wfBlue }} />
 
-          {/* Animated WINDOFORM W-mark */}
-          <div className="flex flex-col items-center gap-4">
-            <WMarkClean size={72} color={wfBlue} animated={true} />
-            <div>
-              <p className="text-xl font-bold" style={{ color: wfBlue }}>Analiz ediliyor...</p>
-              <p className="text-gray-400 text-sm mt-1">Yapay zeka el yazısını okuyor</p>
+          <div className="p-10 flex flex-col items-center gap-8">
+            {/* Taranan görsel */}
+            {onizlemeGorsel && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={onizlemeGorsel} alt=""
+                className="max-h-48 w-full object-contain rounded-2xl shadow-sm" />
+            )}
+
+            {/* Animasyonlu WINDOFORM logo */}
+            <div className="relative flex flex-col items-center gap-5">
+              <div className="relative inline-block">
+                {/* Logo */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/windoform-logo.png"
+                  alt="WINDOFORM"
+                  className="h-12 w-auto object-contain logo-glow logo-pulse"
+                  style={{ filter: "brightness(1)" }}
+                />
+                {/* Scan çizgisi */}
+                <div
+                  className="scan-bar absolute left-0 right-0 h-0.5 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${wfBlue}, transparent)`,
+                    top: 0,
+                  }}
+                />
+              </div>
+
+              <div className="text-center">
+                <p className="font-bold text-gray-800 text-lg">Analiz ediliyor...</p>
+                <p className="text-gray-400 text-sm mt-1">Yapay zeka el yazısını okuyor</p>
+              </div>
+
+              {/* Yükleme noktaları */}
+              <div className="flex items-center gap-2">
+                {[0,1,2].map(i => (
+                  <div key={i} className={`w-2.5 h-2.5 rounded-full ${["dot-bounce-1","dot-bounce-2","dot-bounce-3"][i]}`}
+                    style={{ background: wfBlue }} />
+                ))}
+              </div>
             </div>
-          </div>
-
-          {/* Loading dots */}
-          <div className="flex justify-center gap-2">
-            {[0,1,2].map(i => (
-              <div
-                key={i}
-                className="w-2 h-2 rounded-full"
-                style={{
-                  background: wfBlue,
-                  animation: `wPulse 1.2s ease-in-out ${i * 0.2}s infinite`,
-                  opacity: 0.6,
-                }}
-              />
-            ))}
           </div>
         </div>
       )}
@@ -372,29 +336,25 @@ export default function Home() {
       {adim === "confirm" && mevcutUrun && (
         <div className="space-y-3">
           {/* İlerleme */}
-          <div className="bg-white rounded-2xl shadow-sm p-4">
+          <div className="bg-white rounded-2xl shadow-sm px-4 py-3">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-bold text-gray-700">{mevcutIndex + 1} / {toplamUrun}</span>
-              <div className="flex items-center gap-2">
-                {ralRenk && (
-                  <span className="text-xs font-mono font-bold text-white px-2 py-0.5 rounded-lg"
-                    style={{ background: wfBlue }}>
-                    RAL {ralRenk}
-                  </span>
-                )}
-              </div>
+              {ralRenk && (
+                <span className="text-xs font-mono font-bold text-white px-2.5 py-0.5 rounded-lg"
+                  style={{ background: wfBlue }}>
+                  RAL {ralRenk}
+                </span>
+              )}
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2">
-              <div
-                className="h-2 rounded-full transition-all duration-500"
-                style={{ width: `${((mevcutIndex) / toplamUrun) * 100}%`, background: wfBlue }}
-              />
+            <div className="w-full bg-gray-100 rounded-full h-1.5">
+              <div className="h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${(mevcutIndex / toplamUrun) * 100}%`, background: wfBlue }} />
             </div>
           </div>
 
           {/* Fişten okunan */}
           <div className="rounded-3xl p-5 space-y-2 border-2 border-amber-200 bg-amber-50">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-amber-600">📄 Fişten Okunan</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-amber-500">📄 Fişten Okunan</p>
             <p className="text-xl font-bold text-gray-900 leading-tight">{mevcutUrun.urun_adi}</p>
             <p className="text-5xl font-black" style={{ color: wfBlue }}>{mevcutUrun.miktar}</p>
           </div>
@@ -410,27 +370,22 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4 text-center">
-                  <p className="text-red-600 font-bold">Eşleşen ürün bulunamadı</p>
+                  <p className="text-red-600 font-bold text-sm">Eşleşen ürün bulunamadı</p>
                 </div>
               )}
-
               {stokOneriler.length > 1 && (
                 <div className="space-y-1.5">
                   <p className="text-xs text-gray-400 font-medium">Diğer öneriler:</p>
-                  {stokOneriler.slice(1, 4).map(s => (
+                  {stokOneriler.slice(1,4).map(s => (
                     <button key={s.stok_kodu} onClick={() => setDuzenStok(s)}
-                      className={`w-full text-left text-sm rounded-xl px-4 py-2.5 border transition-all ${
-                        duzenStok?.stok_kodu === s.stok_kodu
-                          ? "border-blue-300 bg-blue-50 font-bold"
-                          : "bg-gray-50 border-gray-200 active:bg-blue-50"
-                      }`}>
+                      className={`w-full text-left text-sm rounded-xl px-4 py-2.5 border transition-colors ${
+                        duzenStok?.stok_kodu === s.stok_kodu ? "border-blue-300 bg-blue-50 font-bold" : "bg-gray-50 border-gray-200"}`}>
                       <span className="font-mono text-xs text-gray-400">{s.stok_kodu}</span>
                       <span className="ml-2 text-gray-700">{s.stok_adi}</span>
                     </button>
                   ))}
                 </div>
               )}
-
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <div>
                   <p className="text-xs text-gray-400 font-medium">Miktar</p>
@@ -446,26 +401,23 @@ export default function Home() {
             <div className="bg-white rounded-3xl shadow-sm p-5 space-y-4">
               <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">✏️ Düzenleme</p>
               <div>
-                <label className="text-xs font-bold text-gray-500 block mb-2 uppercase tracking-wider">Miktar</label>
+                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase tracking-wider">Miktar</label>
                 <input type="number" value={duzenMiktar} onChange={e => setDuzenMiktar(e.target.value)} autoFocus
                   className="w-full border-2 rounded-2xl p-4 text-3xl font-bold text-center focus:outline-none"
                   style={{ borderColor: wfBlue }} />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 block mb-2 uppercase tracking-wider">Ürün Ara</label>
+                <label className="text-xs font-bold text-gray-400 block mb-2 uppercase tracking-wider">Ürün Ara</label>
                 <input type="text" value={stokArama} onChange={e => stokAramaGuncelle(e.target.value)}
                   placeholder="Ürün adı veya stok kodu..."
-                  className="w-full border-2 border-gray-200 rounded-2xl p-3.5 text-sm focus:outline-none focus:border-blue-400" />
+                  className="w-full border-2 border-gray-200 rounded-2xl p-3.5 text-sm focus:outline-none focus:border-blue-300" />
                 {stokOneriler.length > 0 && (
                   <div className="mt-2 space-y-1 max-h-52 overflow-y-auto">
                     {stokOneriler.map(s => (
                       <button key={s.stok_kodu}
                         onClick={() => { setDuzenStok(s); setStokArama(s.stok_adi); setStokOneriler([]); }}
                         className={`w-full text-left text-sm rounded-xl px-4 py-3 border transition-colors ${
-                          duzenStok?.stok_kodu === s.stok_kodu
-                            ? "bg-blue-50 border-blue-300 font-bold"
-                            : "bg-gray-50 border-gray-200 active:bg-blue-50"
-                        }`}>
+                          duzenStok?.stok_kodu === s.stok_kodu ? "bg-blue-50 border-blue-300 font-bold" : "bg-gray-50 border-gray-200"}`}>
                         <span className="font-mono text-xs text-gray-400">{s.stok_kodu}</span>
                         <span className="ml-2">{s.stok_adi}</span>
                       </button>
@@ -474,7 +426,7 @@ export default function Home() {
                 )}
               </div>
               <button onClick={() => setDuzenlemeAcik(false)}
-                className="w-full text-white font-bold py-4 rounded-2xl text-base"
+                className="w-full text-white font-bold py-4 rounded-2xl text-base active:opacity-90"
                 style={{ background: wfBlue }}>
                 💾 Kaydet
               </button>
@@ -484,7 +436,7 @@ export default function Home() {
           {!duzenlemeAcik && (
             <div className="grid grid-cols-2 gap-3">
               <button onClick={atla}
-                className="bg-gray-200 active:bg-gray-300 text-gray-700 font-bold py-6 rounded-3xl text-xl">
+                className="bg-white border-2 border-gray-200 text-gray-600 font-bold py-6 rounded-3xl text-xl active:bg-gray-50">
                 ⏭ Atla
               </button>
               <button onClick={onayla}
@@ -499,61 +451,62 @@ export default function Home() {
 
       {/* ── BAŞKA SAYFA ─────────────────────────────────────────────────── */}
       {adim === "more_pages" && (
-        <div className="bg-white rounded-3xl shadow-md p-8 text-center space-y-6">
-          <WMarkClean size={52} color={wfBlue} className="mx-auto" />
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Başka Sayfa Var Mı?</h2>
-            <p className="text-gray-400 mt-1">
-              {tumOnaylananlar.filter(i => !i.skipped).length} ürün onaylandı
-            </p>
+        <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+          <div className="h-1.5" style={{ background: wfBlue }} />
+          <div className="p-8 flex flex-col items-center text-center gap-5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/windoform-logo.png" alt="WINDOFORM" className="h-8 object-contain opacity-70" />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Başka Sayfa Var Mı?</h2>
+              <p className="text-gray-400 mt-1 text-sm">{tumOnaylananlar.filter(i => !i.skipped).length} ürün onaylandı</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 w-full">
+              <button onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setAdim("scan"); }}
+                className="text-white font-bold py-7 rounded-3xl text-2xl shadow-lg active:opacity-90"
+                style={{ background: "#16a34a" }}>
+                ✅ Evet
+              </button>
+              <button onClick={() => setAdim("done")}
+                className="text-white font-bold py-7 rounded-3xl text-2xl shadow-lg active:opacity-90"
+                style={{ background: "#dc2626" }}>
+                ❌ Hayır
+              </button>
+            </div>
+            <p className="text-gray-300 text-xs">Hayır → Excel oluşturulur</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setAdim("scan"); }}
-              className="text-white font-bold py-7 rounded-3xl text-2xl shadow-lg"
-              style={{ background: "#16a34a" }}>
-              ✅ Evet
-            </button>
-            <button onClick={() => setAdim("done")}
-              className="text-white font-bold py-7 rounded-3xl text-2xl shadow-lg"
-              style={{ background: "#dc2626" }}>
-              ❌ Hayır
-            </button>
-          </div>
-          <p className="text-gray-400 text-xs">Hayır → Excel oluşturulur</p>
         </div>
       )}
 
       {/* ── TAMAMLANDI ──────────────────────────────────────────────────── */}
       {adim === "done" && (
         <div className="space-y-4">
-          <div className="rounded-3xl p-8 text-center space-y-4 text-white shadow-lg"
-            style={{ background: `linear-gradient(135deg, ${wfBlue} 0%, ${wfBlueDark} 100%)` }}>
-            <WMarkClean size={48} color="white" className="mx-auto" />
-            <h2 className="text-3xl font-bold">Tamamlandı!</h2>
-            <p className="opacity-80 text-lg">
-              <strong>{onaylananSayisi}</strong> ürün — {tarih}
-            </p>
+          <div className="rounded-3xl overflow-hidden shadow-lg"
+            style={{ background: `linear-gradient(135deg, ${wfBlue} 0%, #1e3d6e 100%)` }}>
+            <div className="p-8 flex flex-col items-center text-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/windoform-logo.png" alt="WINDOFORM"
+                className="h-8 object-contain"
+                style={{ filter: "brightness(0) invert(1)" }} />
+              <div>
+                <p className="text-white/70 text-sm uppercase tracking-widest font-medium">Tamamlandı</p>
+                <p className="text-white text-4xl font-black mt-1">{onaylananSayisi} Ürün</p>
+                <p className="text-white/60 text-sm mt-1">{tarih}</p>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl shadow-sm p-5 space-y-2">
-            <h3 className="font-bold text-gray-700 text-sm uppercase tracking-wider">Onaylanan Ürünler</h3>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Onaylanan Ürünler</p>
             <div className="space-y-1.5 max-h-64 overflow-y-auto">
-              {tumOnaylananlar.map((urun, idx) => (
+              {tumOnaylananlar.map((u, idx) => (
                 <div key={idx}
-                  className={`flex items-center gap-3 p-3 rounded-2xl ${urun.skipped ? "bg-gray-50 text-gray-400" : "bg-blue-50"}`}>
-                  <span className="text-base">{urun.skipped ? "⏭" : "✅"}</span>
+                  className={`flex items-center gap-3 p-3 rounded-2xl ${u.skipped ? "bg-gray-50 text-gray-400" : "bg-blue-50"}`}>
+                  <span className="text-sm">{u.skipped ? "⏭" : "✅"}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate text-sm">
-                      {urun.confirmed_stok?.stok_adi || urun.original_urun_adi}
-                    </p>
-                    {urun.confirmed_stok &&
-                      <p className="text-xs font-mono text-gray-400">{urun.confirmed_stok.stok_kodu}</p>}
+                    <p className="font-medium truncate text-sm">{u.confirmed_stok?.stok_adi || u.original_urun_adi}</p>
+                    {u.confirmed_stok && <p className="text-xs font-mono text-gray-400">{u.confirmed_stok.stok_kodu}</p>}
                   </div>
-                  {!urun.skipped &&
-                    <span className="font-bold text-lg whitespace-nowrap" style={{ color: wfBlue }}>
-                      {urun.confirmed_miktar}
-                    </span>}
+                  {!u.skipped && <span className="font-bold text-base whitespace-nowrap" style={{ color: wfBlue }}>{u.confirmed_miktar}</span>}
                 </div>
               ))}
             </div>
@@ -564,9 +517,8 @@ export default function Home() {
             style={{ background: wfBlue }}>
             📥 Excel İndir
           </button>
-
           <button onClick={yenidenBaslat}
-            className="w-full bg-white border border-gray-200 text-gray-600 font-bold py-4 rounded-3xl text-base shadow-sm">
+            className="w-full bg-white border border-gray-200 text-gray-500 font-bold py-4 rounded-3xl text-base shadow-sm active:bg-gray-50">
             🔄 Yeni Fiş Tara
           </button>
         </div>
@@ -575,41 +527,43 @@ export default function Home() {
       {/* ── GÜNCELLE ────────────────────────────────────────────────────── */}
       {adim === "update" && (
         <div className="space-y-4">
-          <div className="bg-white rounded-3xl shadow-sm p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <WMarkClean size={32} color={wfBlue} />
+          <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+            <div className="h-1.5" style={{ background: wfBlue }} />
+            <div className="p-6 space-y-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/windoform-logo.png" alt="WINDOFORM" className="h-7 object-contain" />
               <div>
-                <h2 className="text-lg font-bold" style={{ color: wfBlue }}>Stok Kartını Güncelle</h2>
-                <p className="text-xs text-gray-400">{stokData.length.toLocaleString("tr-TR")} ürün kayıtlı</p>
+                <h2 className="text-lg font-bold text-gray-900">Stok Kartını Güncelle</h2>
+                <p className="text-sm text-gray-400 mt-0.5">{stokData.length.toLocaleString("tr-TR")} ürün kayıtlı</p>
               </div>
+              <p className="text-sm text-gray-500">Yalnızca <strong>yeni stok kodları</strong> eklenir.</p>
+              <label className="block cursor-pointer">
+                <div className="border-2 border-dashed rounded-2xl p-8 text-center active:bg-blue-50 transition-all"
+                  style={{ borderColor: wfBlue }}>
+                  <div className="flex flex-col items-center gap-2">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={wfBlue} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                      <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    <p className="font-bold text-base" style={{ color: wfBlue }}>Excel Dosyası Seç</p>
+                    <p className="text-gray-400 text-xs">Stok Kart Kayıtları.xlsx</p>
+                  </div>
+                </div>
+                <input type="file" accept=".xlsx,.xls" className="hidden" onChange={stokGuncelle} />
+              </label>
+              {guncellemeMetni && (
+                <div className={`rounded-2xl p-4 text-sm font-medium ${
+                  guncellemeMetni.startsWith("✅") ? "bg-green-50 text-green-800 border border-green-200" :
+                  guncellemeMetni.startsWith("❌") ? "bg-red-50 text-red-800 border border-red-200" : "bg-gray-50 text-gray-600"}`}>
+                  {guncellemeMetni}
+                </div>
+              )}
             </div>
-            <p className="text-sm text-gray-500">
-              Yalnızca <strong>yeni stok kodları</strong> eklenir. Mevcut veriler değişmez.
-            </p>
-
-            <label className="block cursor-pointer">
-              <div className="border-2 border-dashed rounded-2xl p-8 text-center active:bg-blue-50 transition-all"
-                style={{ borderColor: wfBlue }}>
-                <div className="text-4xl mb-2">📂</div>
-                <p className="font-bold text-base" style={{ color: wfBlue }}>Excel Dosyası Seç</p>
-                <p className="text-gray-400 text-xs mt-1">Stok Kart Kayıtları.xlsx</p>
-              </div>
-              <input type="file" accept=".xlsx,.xls" className="hidden" onChange={stokGuncelle} />
-            </label>
-
-            {guncellemeMetni && (
-              <div className={`rounded-2xl p-4 text-sm font-medium ${
-                guncellemeMetni.startsWith("✅") ? "bg-green-50 text-green-800 border border-green-200" :
-                guncellemeMetni.startsWith("❌") ? "bg-red-50 text-red-800 border border-red-200" :
-                "bg-gray-50 text-gray-600"}`}>
-                {guncellemeMetni}
-              </div>
-            )}
           </div>
-
           <button onClick={() => setAdim("scan")}
-            className="w-full bg-white border border-gray-200 text-gray-600 font-bold py-4 rounded-3xl text-base shadow-sm">
-            ← Geri Dön
+            className="w-full bg-white border border-gray-200 text-gray-500 font-bold py-4 rounded-3xl text-base shadow-sm active:bg-gray-50 flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Geri Dön
           </button>
         </div>
       )}
