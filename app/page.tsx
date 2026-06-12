@@ -138,6 +138,21 @@ export default function Home() {
   const satirHazirla = useCallback((urun: ScannedItem) => {
     setDuzenMiktar(urun.miktar || ""); setStokArama(urun.urun_adi || ""); setDuzenlemeAcik(false);
 
+    // ── Bilinen takma adlar → stok arama terimi ────────────────────────────
+    const ALIAS_MAP: { pattern: RegExp; query: string }[] = [
+      { pattern: /sa[çc]\s*kapak/i, query: "SC" },
+      // Buraya yeni alias'lar eklenebilir:
+      // { pattern: /örnek/i, query: "STOK_TERIMI" },
+    ];
+    for (const { pattern, query } of ALIAS_MAP) {
+      if (pattern.test(urun.urun_adi)) {
+        const q = ralRenk ? `${ralRenk} ${query}` : query;
+        const e = findMatches(q, stokData, 5);
+        setStokOneriler(e); setDuzenStok(e[0] || null);
+        return;
+      }
+    }
+
     // "mat" sadece yüzey bilgisidir, ürün tipini belirtmez → aramadan çıkar
     const temizAd = urun.urun_adi.replace(/\bmat\b/gi, "").replace(/\s+/g, " ").trim();
 
