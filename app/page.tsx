@@ -273,14 +273,14 @@ export default function Home() {
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-bold tracking-widest"
                     style={{ color: wfBlue }}>RAL</span>
                   <input
-                    type="number"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    type="text"
+                    inputMode="text"
                     value={ralRenk}
-                    onChange={e => setRalRenk(e.target.value.slice(0, 6))}
-                    placeholder="örn: 9005"
+                    onChange={e => setRalRenk(e.target.value.slice(0, 12))}
+                    placeholder="örn: 9005 mat"
                     autoFocus
-                    className="w-full border-2 rounded-2xl pl-16 pr-5 py-5 text-4xl font-black tracking-widest focus:outline-none transition-colors"
+                    autoCapitalize="none"
+                    className="w-full border-2 rounded-2xl pl-16 pr-5 py-5 text-3xl font-black tracking-widest focus:outline-none transition-colors"
                     style={{ borderColor: ralRenk ? wfBlue : "#e5e7eb",
                              color: ralRenk ? wfBlue : "#9ca3af" }}
                   />
@@ -290,7 +290,7 @@ export default function Home() {
                 <div className="mt-3">
                   <p className="text-xs text-gray-400 font-medium mb-2">Hızlı seç:</p>
                   <div className="flex flex-wrap gap-2">
-                    {["9005","8019","7016","7039","9016","1013","6005"].map(ral => (
+                    {["9005 mat","8019","7016","7039 mat","9016","1013","6005"].map(ral => (
                       <button key={ral}
                         onClick={() => setRalRenk(ral)}
                         className={`px-3 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${
