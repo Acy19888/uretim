@@ -28,10 +28,13 @@ export const KISALTMALAR: Record<string, string> = {
 
 export function kisaltmaAc(text: string): string {
   let result = text;
+  // Exact abbreviation map
   for (const [kisalt, acik] of Object.entries(KISALTMALAR)) {
     const re = new RegExp(`\\b${kisalt}\\b`, "gi");
     result = result.replace(re, acik);
   }
+  // Pattern: HB?B — handles typos like HB5B, HBXB, HBAB etc. → Hebe Schiebe
+  result = result.replace(/\bHB.B\b/gi, "Hebe Schiebe");
   return result;
 }
 
