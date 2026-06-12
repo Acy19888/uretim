@@ -110,6 +110,7 @@ function stokYukle(): StokItem[] {
 // ── Main ───────────────────────────────────────────────────────────────────
 export default function Home() {
   const [adim, setAdim]                       = useState<Step>("ral");
+  const [adimGecmisi, setAdimGecmisi]         = useState<Step[]>([]);
   const [stokData, setStokData]               = useState<StokItem[]>([]);
   const [tumOnaylananlar, setTumOnaylananlar]  = useState<ConfirmedItem[]>([]);
   const [isEmriNo]                            = useState("");
@@ -132,12 +133,32 @@ export default function Home() {
 
   useEffect(() => { setStokData(stokYukle()); }, []);
 
+  /** Adım değiştir ve geçmişe kaydet */
+  function gidim(hedef: Step) {
+    setAdimGecmisi(prev => [...prev, adim]);
+    setAdim(hedef);
+  }
+
+  /** Bir önceki adıma dön */
+  function geriGit() {
+    setAdimGecmisi(prev => {
+      if (prev.length === 0) return prev;
+      const yeni = [...prev];
+      const onceki = yeni.pop()!;
+      setAdim(onceki);
+      // processing'e geri dönmeyelim
+      return yeni;
+    });
+  }
+
+  const geriVar = adimGecmisi.length > 0 && adim !== "ral" && adim !== "done";
+
   async function gorselSec(e: React.ChangeEvent<HTMLInputElement>) {
     const dosya = e.target.files?.[0];
     if (!dosya) return;
     setHata(null);
     setOnizlemeGorsel(URL.createObjectURL(dosya));
-    setAdim("processing");
+    gidim("processing");
     try {
       const b64 = await toBase64(dosya);
       // Fotoğrafı sakla (OneDrive yüklemesi için)
@@ -156,7 +177,7 @@ export default function Home() {
         ...item,
         miktar: parseMiktar(item.miktar),
       }));
-      setTaramaKonusu(sonuc); setMevcutIndex(0); setSayfaOnaylananlar([]); setAdim("confirm");
+      setTaramaKonusu(sonuc); setMevcutIndex(0); setSayfaOnaylananlar([]); gidim("confirm");
     } catch (err) { setHata(String(err)); setAdim("scan"); }
   }
 
@@ -235,7 +256,7 @@ export default function Home() {
   function ilerle(g: ConfirmedItem[]) {
     setSayfaOnaylananlar(g);
     if (mevcutIndex + 1 < taramaKonusu!.items.length) setMevcutIndex(mevcutIndex + 1);
-    else { setTumOnaylananlar(prev => [...prev, ...g]); setAdim("more_pages"); }
+    else { setTumOnaylananlar(prev => [...prev, ...g]); gidim("more_pages"); }
   }
   function stokAramaGuncelle(q: string) {
     setStokArama(q);
@@ -318,6 +339,18 @@ export default function Home() {
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4 pb-12">
+
+      {/* Geri butonu */}
+      {geriVar && (
+        <button
+          onClick={geriGit}
+          className="flex items-center gap-1.5 text-gray-500 font-medium py-1 active:opacity-60 transition-opacity">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span className="text-sm">Geri</span>
+        </button>
+      )}
 
       {/* Hata */}
       {hata && (
@@ -699,7 +732,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-3 w-full">
               {/* Evet */}
               <button
-                onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setRalRenk(""); setAdim("ral"); }}
+                onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setRalRenk(""); setAdimGecmisi([]); gidim("ral"); }}
                 className="group relative overflow-hidden rounded-3xl shadow-md active:scale-95 transition-transform"
                 style={{ background: "linear-gradient(145deg, #16a34a, #15803d)" }}>
                 <div className="flex flex-col items-center justify-center gap-2.5 py-7 px-4">
@@ -713,7 +746,7 @@ export default function Home() {
               </button>
               {/* Hayır */}
               <button
-                onClick={() => setAdim("done")}
+                onClick={() => gidim("done")}
                 className="group relative overflow-hidden rounded-3xl shadow-md active:scale-95 transition-transform bg-white border-2 border-gray-200">
                 <div className="flex flex-col items-center justify-center gap-2.5 py-7 px-4">
                   <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
