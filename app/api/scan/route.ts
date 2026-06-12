@@ -44,12 +44,12 @@ Tüm bilgileri çıkar ve JSON formatında döndür.
 - **HBSB** veya benzer yazım (HB5B vb.) → **Hebe Schiebe**
 
 **Tekrarlama İşareti (Ditto / " " ") ÇOK ÖNEMLİ:**
-- Bazen bir satırda ürün adı yerine tırnak işareti veya ditto işareti yazılır: `"`, `''`, `,,` veya birden fazla `" " "`
+- Bazen bir satırda ürün adı yerine tırnak işareti veya ditto işareti yazılır: ", '', ,, veya birden fazla " " "
 - Bu işaret "yukarıdaki satırın aynısı" anlamına gelir
 - O satırın ürün adını bir üstteki satırla aynı yap — ama miktar ve varsa ek kelime (sol/sağ, iç/dış vb.) farklı olabilir
 - Örnek:
   - Satır 1: "Atlas kıvrık kol sol" → 800
-  - Satır 2: `" " "` sağ → 600
+  - Satır 2: " " " sağ → 600
   - Sonuç: Satır 2 = "Atlas kıvrık kol sağ", miktar 600
 - Ditto satırında ek bir kelime varsa (sol/sağ/iç/dış/büyük/küçük vb.) → onu ürün adına ekle
 - Ditto işareti sadece ürün adı için geçerlidir; miktar her zaman o satırda yazılı değerdir
