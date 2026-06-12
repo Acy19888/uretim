@@ -137,7 +137,26 @@ export default function Home() {
 
   const satirHazirla = useCallback((urun: ScannedItem) => {
     setDuzenMiktar(urun.miktar || ""); setStokArama(urun.urun_adi || ""); setDuzenlemeAcik(false);
-    const q = ralRenk ? `${ralRenk} ${urun.urun_adi}` : urun.urun_adi;
+
+    // "mat" sadece yüzey bilgisidir, ürün tipini belirtmez → aramadan çıkar
+    const temizAd = urun.urun_adi.replace(/\bmat\b/gi, "").replace(/\s+/g, " ").trim();
+
+    // Eğer ürün adında tip belirten bir kelime yoksa → pencere/kapı kolu varsay
+    const TIP_KELIMELERI = [
+      "gobek","göbek","kapak","mentese","menteş","menteşe",
+      "ayna","mandal","kilit","flanş","flans","kose","köşe",
+      "cita","çıta","panel","kapı kolu","pencere kolu",
+      "kol","kavrama","topuz","pres","sürgü","surgü"
+    ];
+    const tipVar = TIP_KELIMELERI.some(k =>
+      urun.urun_adi.toLowerCase().includes(k)
+    );
+    const tipEki = tipVar ? "" : " kol";
+
+    const q = ralRenk
+      ? `${ralRenk} ${temizAd}${tipEki}`
+      : `${temizAd}${tipEki}`;
+
     const e = findMatches(q, stokData, 5);
     setStokOneriler(e); setDuzenStok(e[0] || null);
   }, [stokData, ralRenk]);
