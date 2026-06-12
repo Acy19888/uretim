@@ -31,7 +31,7 @@ async function getToken(): Promise<string> {
 async function uploadFile(
   token: string,
   filename: string,
-  body: Buffer | Uint8Array,
+  body: BodyInit,
   contentType: string
 ): Promise<void> {
   const path = `${FOLDER}/${filename}`;
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
     // Excel
     const excelBuf  = buildExcel(exportPayload);
     const excelName = `Uretim_${baseName}.xlsx`;
-    uploads.push(uploadFile(token, excelName, excelBuf,
+    uploads.push(uploadFile(token, excelName, excelBuf as unknown as BodyInit,
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
 
     // Fotoğraflar
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
       const ext  = mime.split("/")[1]?.split(";")[0] || "jpg";
       const name = `Uretim_${baseName}_foto${photos.length > 1 ? `_${i+1}` : ""}.${ext}`;
       const bin  = Buffer.from(data, "base64");
-      uploads.push(uploadFile(token, name, bin, mime));
+      uploads.push(uploadFile(token, name, bin as unknown as BodyInit, mime));
     }
 
     await Promise.all(uploads);
