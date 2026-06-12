@@ -15,6 +15,26 @@ function bigramSim(a: string, b: string): number {
   return (2 * hits) / (a.length + b.length - 2);
 }
 
+/**
+ * Bilinen kısaltmaları açık hale getirir.
+ * "Atlas HBSB" → "Atlas Hebe Schiebe"
+ */
+export const KISALTMALAR: Record<string, string> = {
+  "HBSB": "Hebe Schiebe",
+  "HST":  "Hebe Schiebe",
+  "PVC":  "PVC",
+  "AL":   "Aluminyum",
+};
+
+export function kisaltmaAc(text: string): string {
+  let result = text;
+  for (const [kisalt, acik] of Object.entries(KISALTMALAR)) {
+    const re = new RegExp(`\\b${kisalt}\\b`, "gi");
+    result = result.replace(re, acik);
+  }
+  return result;
+}
+
 // Normalize Turkish characters for comparison
 export function normalize(str: string): string {
   return str

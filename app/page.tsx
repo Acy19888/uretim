@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as XLSX from "xlsx";
-import { findMatches } from "@/lib/fuzzy";
+import { findMatches, kisaltmaAc, normalize } from "@/lib/fuzzy";
 import type { StokItem, ScannedItem, ConfirmedItem, ScanResult } from "@/lib/types";
 import bundledStok from "@/lib/stokData.json";
 
@@ -70,6 +70,31 @@ function bugunStr() {
   const d = new Date();
   return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`;
 }
+const OGRENIM_KEY = "ogrenilen_eslesmeler";
+
+/** Öğrenilen düzeltmeyi kaydet: "ATLAS HBSB" → stok_kodu */
+function ogrenimKaydet(urunAdi: string, stokKodu: string) {
+  try {
+    const key = normalize(urunAdi);
+    const map: Record<string, string> = JSON.parse(
+      localStorage.getItem(OGRENIM_KEY) || "{}"
+    );
+    map[key] = stokKodu;
+    localStorage.setItem(OGRENIM_KEY, JSON.stringify(map));
+  } catch { /* ignore */ }
+}
+
+/** Öğrenilmiş düzeltmeyi getir — varsa stok_kodu döner */
+function ogrenimGetir(urunAdi: string): string | null {
+  try {
+    const key = normalize(urunAdi);
+    const map: Record<string, string> = JSON.parse(
+      localStorage.getItem(OGRENIM_KEY) || "{}"
+    );
+    return map[key] || null;
+  } catch { return null; }
+}
+
 function stokYukle(): StokItem[] {
   const base = bundledStok as StokItem[];
   try {
@@ -138,11 +163,23 @@ export default function Home() {
   const satirHazirla = useCallback((urun: ScannedItem) => {
     setDuzenMiktar(urun.miktar || ""); setStokArama(urun.urun_adi || ""); setDuzenlemeAcik(false);
 
-    // ── Bilinen takma adlar → stok arama terimi ────────────────────────────
+    // ── 1. Öğrenilmiş düzeltme varsa → direkt kullan ──────────────────────
+    const ogrenilmis = ogrenimGetir(urun.urun_adi);
+    if (ogrenilmis) {
+      const stokItem = stokData.find(s => s.stok_kodu === ogrenilmis);
+      if (stokItem) {
+        // Öğrenileni başa koy, geri kalanını fuzzy ile doldur
+        const diger = findMatches(urun.urun_adi, stokData, 6)
+          .filter(s => s.stok_kodu !== ogrenilmis);
+        setStokOneriler([stokItem, ...diger]);
+        setDuzenStok(stokItem);
+        return;
+      }
+    }
+
+    // ── 2. Bilinen takma adlar → stok arama terimi ────────────────────────
     const ALIAS_MAP: { pattern: RegExp; query: string }[] = [
       { pattern: /sa[çc]\s*kapak/i, query: "SC" },
-      // Buraya yeni alias'lar eklenebilir:
-      // { pattern: /örnek/i, query: "STOK_TERIMI" },
     ];
     for (const { pattern, query } of ALIAS_MAP) {
       if (pattern.test(urun.urun_adi)) {
@@ -153,8 +190,10 @@ export default function Home() {
       }
     }
 
+    // ── 3. Kısaltma açma: HBSB → Hebe Schiebe vb. ────────────────────────
     // "mat" sadece yüzey bilgisidir, ürün tipini belirtmez → aramadan çıkar
-    const temizAd = urun.urun_adi.replace(/\bmat\b/gi, "").replace(/\s+/g, " ").trim();
+    const temizAd = kisaltmaAc(urun.urun_adi)
+      .replace(/\bmat\b/gi, "").replace(/\s+/g, " ").trim();
 
     // Eğer ürün adında tip belirten bir kelime yoksa → pencere/kapı kolu varsay
     const TIP_KELIMELERI = [
@@ -183,6 +222,8 @@ export default function Home() {
 
   function onayla() {
     const u = taramaKonusu!.items[mevcutIndex];
+    // Onaylanan eşleşmeyi öğren — bir sonraki aynı ürün adında ilk sıraya gelir
+    if (duzenStok) ogrenimKaydet(u.urun_adi, duzenStok.stok_kodu);
     ilerle([...sayfaOnaylananlar, { original_urun_adi: u.urun_adi, original_miktar: u.miktar,
       confirmed_stok: duzenStok, confirmed_miktar: parseFloat(duzenMiktar.replace(",",".")) || 0, skipped: false }]);
   }
@@ -862,6 +903,20 @@ export default function Home() {
                   {guncellemeMetni}
                 </div>
               )}
+
+              {/* Öğrenilenleri sıfırla */}
+              <div className="pt-2 border-t border-gray-100">
+                <p className="text-xs text-gray-400 mb-2">
+                  {(() => {
+                    try { return Object.keys(JSON.parse(localStorage.getItem(OGRENIM_KEY) || "{}")).length; } catch { return 0; }
+                  })()} öğrenilmiş düzeltme kayıtlı
+                </p>
+                <button
+                  onClick={() => { localStorage.removeItem(OGRENIM_KEY); setGuncellemeMetni("✅ Öğrenilmiş düzeltmeler sıfırlandı."); }}
+                  className="text-xs text-red-400 underline">
+                  Öğrenilenleri Sıfırla
+                </button>
+              </div>
             </div>
           </div>
           <button onClick={() => setAdim("scan")}
