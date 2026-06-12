@@ -175,10 +175,14 @@ export default function Home() {
       const ws  = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json<Record<string,string>>(ws, { raw: false, defval: "" });
       const yeni: StokItem[] = rows.flatMap(r => {
-        const kodu = (r["STOK_KODU"]||r["Stok Kodu"]||"").trim();
-        const adi  = (r["STOK_ADI"] ||r["Stok Adı"] ||"").trim();
-        const cesit= (r["Çeşit"]||"").trim();
-        return kodu && adi ? [{ stok_kodu: kodu, stok_adi: adi, cesit }] : [];
+        const kodu   = (r["STOK_KODU"]||r["Stok Kodu"]||"").trim();
+        const adi    = (r["STOK_ADI"] ||r["Stok Adı"] ||"").trim();
+        const cesit  = (r["Çeşit"]||"").trim();
+        const uretim = (r["Üretim"]||r["URETIM"]||r["Uretim"]||"").trim().toUpperCase();
+        // Sadece YARI MAMUL
+        if (!kodu || !adi) return [];
+        if (uretim && uretim !== "YARI MAMUL") return [];
+        return [{ stok_kodu: kodu, stok_adi: adi, cesit }];
       });
       const mevcut = new Set((bundledStok as StokItem[]).map(i => i.stok_kodu));
       const gercekYeni = yeni.filter(i => !mevcut.has(i.stok_kodu));
