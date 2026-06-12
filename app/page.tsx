@@ -6,7 +6,7 @@ import { findMatches } from "@/lib/fuzzy";
 import type { StokItem, ScannedItem, ConfirmedItem, ScanResult } from "@/lib/types";
 import bundledStok from "@/lib/stokData.json";
 
-type Step = "scan" | "processing" | "confirm" | "more_pages" | "done" | "update";
+type Step = "ral" | "scan" | "processing" | "confirm" | "more_pages" | "done" | "update";
 
 // ── SVG Icons ─────────────────────────────────────────────────────────────
 function IconCamera() {
@@ -84,7 +84,7 @@ function stokYukle(): StokItem[] {
 
 // ── Main ───────────────────────────────────────────────────────────────────
 export default function Home() {
-  const [adim, setAdim]                       = useState<Step>("scan");
+  const [adim, setAdim]                       = useState<Step>("ral");
   const [stokData, setStokData]               = useState<StokItem[]>([]);
   const [tumOnaylananlar, setTumOnaylananlar]  = useState<ConfirmedItem[]>([]);
   const [isEmriNo]                            = useState("");
@@ -93,8 +93,11 @@ export default function Home() {
   const [mevcutIndex, setMevcutIndex]         = useState(0);
   const [sayfaOnaylananlar, setSayfaOnaylananlar] = useState<ConfirmedItem[]>([]);
   const [onizlemeGorsel, setOnizlemeGorsel]   = useState<string | null>(null);
+  const [taramaFotolari, setTaramaFotolari]   = useState<{data: string; mime: string}[]>([]);
   const [hata, setHata]                       = useState<string | null>(null);
   const [ralRenk, setRalRenk]                 = useState("");
+  const [odDurum, setOdDurum]                 = useState<"idle"|"loading"|"success"|"error">("idle");
+  const [odMesaj, setOdMesaj]                 = useState<string | null>(null);
   const [duzenMiktar, setDuzenMiktar]         = useState("");
   const [duzenStok, setDuzenStok]             = useState<StokItem | null>(null);
   const [stokArama, setStokArama]             = useState("");
@@ -112,6 +115,8 @@ export default function Home() {
     setAdim("processing");
     try {
       const b64 = await toBase64(dosya);
+      // Fotoğrafı sakla (OneDrive yüklemesi için)
+      setTaramaFotolari(prev => [...prev, { data: b64, mime: dosya.type || "image/jpeg" }]);
       const res = await fetch("/api/scan", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64: b64, mimeType: dosya.type }),
@@ -119,7 +124,8 @@ export default function Home() {
       if (!res.ok) throw new Error((await res.json()).error || "Tarama başarısız");
       const sonuc: ScanResult = await res.json();
       if (!sonuc.items?.length) throw new Error("Hiçbir ürün algılanamadı.");
-      if (sonuc.ral_renk) setRalRenk(sonuc.ral_renk);
+      // Sadece manuel RAL girilmemişse AI'dan okunanı kullan
+      if (!ralRenk && sonuc.ral_renk) setRalRenk(sonuc.ral_renk);
       // Miktar içinde "+" varsa topla (örn: "1848 + 1900" → "3748")
       sonuc.items = sonuc.items.map(item => ({
         ...item,
@@ -201,7 +207,28 @@ export default function Home() {
   }
   function yenidenBaslat() {
     setTumOnaylananlar([]); setTaramaKonusu(null); setSayfaOnaylananlar([]);
-    setMevcutIndex(0); setOnizlemeGorsel(null); setRalRenk(""); setAdim("scan");
+    setMevcutIndex(0); setOnizlemeGorsel(null); setRalRenk("");
+    setTaramaFotolari([]); setOdDurum("idle"); setOdMesaj(null);
+    setAdim("ral");
+  }
+
+  async function oneDriveYukle() {
+    setOdDurum("loading"); setOdMesaj(null);
+    try {
+      const { uploadToOneDrive } = await import("@/lib/onedrive");
+      const baseName = tarih.replace(/\./g, "-") + "_" +
+        new Date().toTimeString().slice(0, 5).replace(":", "-");
+      const result = await uploadToOneDrive({
+        exportPayload: { is_emri_no: isEmriNo, tarih, items: tumOnaylananlar },
+        baseName,
+        photos: taramaFotolari,
+      });
+      setOdDurum("success");
+      setOdMesaj(`✅ ${result.uploaded} dosya ${result.folder} klasörüne yüklendi`);
+    } catch (err) {
+      setOdDurum("error");
+      setOdMesaj("❌ " + String(err));
+    }
   }
 
   const mevcutUrun      = taramaKonusu?.items[mevcutIndex];
@@ -222,27 +249,121 @@ export default function Home() {
         </div>
       )}
 
+      {/* ── RAL GİRİŞİ ─────────────────────────────────────────────────── */}
+      {adim === "ral" && (
+        <div className="wf-fade-up space-y-4">
+          <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+            <div className="h-1.5 w-full" style={{ background: wfBlue }} />
+            <div className="px-6 pt-7 pb-8 space-y-6">
+
+              {/* Başlık */}
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: wfBlue }}>
+                  Adım 1 / 2
+                </p>
+                <h2 className="text-2xl font-black text-gray-900">RAL Renk Kodu</h2>
+                <p className="text-gray-400 text-sm mt-1">
+                  Fişteki RAL kodunu girin, sonra fotoğraf çekin
+                </p>
+              </div>
+
+              {/* Büyük RAL input */}
+              <div>
+                <div className="relative">
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-bold tracking-widest"
+                    style={{ color: wfBlue }}>RAL</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={ralRenk}
+                    onChange={e => setRalRenk(e.target.value.slice(0, 6))}
+                    placeholder="örn: 9005"
+                    autoFocus
+                    className="w-full border-2 rounded-2xl pl-16 pr-5 py-5 text-4xl font-black tracking-widest focus:outline-none transition-colors"
+                    style={{ borderColor: ralRenk ? wfBlue : "#e5e7eb",
+                             color: ralRenk ? wfBlue : "#9ca3af" }}
+                  />
+                </div>
+
+                {/* Yaygın RAL hızlı seç */}
+                <div className="mt-3">
+                  <p className="text-xs text-gray-400 font-medium mb-2">Hızlı seç:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["9005","8019","7016","7039","9016","1013","6005"].map(ral => (
+                      <button key={ral}
+                        onClick={() => setRalRenk(ral)}
+                        className={`px-3 py-1.5 rounded-xl text-sm font-bold border-2 transition-all ${
+                          ralRenk === ral
+                            ? "text-white border-transparent"
+                            : "bg-white border-gray-200 text-gray-600"
+                        }`}
+                        style={ralRenk === ral ? { background: wfBlue, borderColor: wfBlue } : {}}>
+                        {ral}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Devam butonu */}
+              <button
+                onClick={() => setAdim("scan")}
+                className="w-full text-white font-bold py-5 rounded-3xl text-lg shadow-lg active:scale-95 transition-transform"
+                style={{ background: ralRenk
+                  ? `linear-gradient(145deg, ${wfBlue}, #1e3d6e)`
+                  : "#9ca3af" }}>
+                {ralRenk ? `RAL ${ralRenk} ile Devam →` : "RAL girmeden Devam →"}
+              </button>
+
+            </div>
+          </div>
+
+          {/* Güncelle linki */}
+          <button onClick={() => { setAdim("update"); setGuncellemeMetni(null); }}
+            className="w-full bg-white border border-gray-200 rounded-2xl py-3.5 flex items-center justify-between px-5 shadow-sm active:bg-gray-50">
+            <div className="flex items-center gap-2 text-gray-500">
+              <IconRefresh />
+              <span className="text-sm font-medium">Stok Kartını Güncelle</span>
+            </div>
+            <IconChevron />
+          </button>
+        </div>
+      )}
+
       {/* ── TARAMA ──────────────────────────────────────────────────────── */}
       {adim === "scan" && (
         <div className="space-y-3 wf-fade-up">
 
-          {/* Durum kartı */}
+          {/* Durum kartı — RAL göster */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-4 flex justify-between items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: wfBlue }}>
-                Yarı Mamul Çıkış
+              <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: wfBlue }}>
+                Adım 2 / 2 — Fotoğraf
               </p>
               {tumOnaylananlar.length > 0 && (
-                <p className="text-sm font-medium mt-0.5" style={{ color: "#16a34a" }}>
+                <p className="text-sm font-medium" style={{ color: "#16a34a" }}>
                   ✓ {onaylananSayisi} ürün onaylandı
                 </p>
               )}
             </div>
-            <div className="text-right">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">Stok</p>
-              <p className="text-lg font-bold" style={{ color: wfBlue }}>
-                {stokData.length.toLocaleString("tr-TR")}
-              </p>
+            {/* RAL badge */}
+            <div className="flex items-center gap-2">
+              {ralRenk ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-white px-3 py-1.5 rounded-xl"
+                    style={{ background: wfBlue }}>
+                    RAL {ralRenk}
+                  </span>
+                  <button onClick={() => setAdim("ral")}
+                    className="text-gray-400 text-xs underline">değiştir</button>
+                </div>
+              ) : (
+                <button onClick={() => setAdim("ral")}
+                  className="text-xs font-bold px-3 py-1.5 rounded-xl border-2 border-dashed border-gray-300 text-gray-400">
+                  + RAL ekle
+                </button>
+              )}
             </div>
           </div>
 
@@ -289,15 +410,6 @@ export default function Home() {
             </label>
           </div>
 
-          {/* Güncelle */}
-          <button onClick={() => { setAdim("update"); setGuncellemeMetni(null); }}
-            className="w-full bg-white border border-gray-200 rounded-2xl py-4 flex items-center justify-between px-5 shadow-sm active:bg-gray-50">
-            <div className="flex items-center gap-2 text-gray-500">
-              <IconRefresh />
-              <span className="text-sm font-medium">Stok Kartını Güncelle</span>
-            </div>
-            <IconChevron />
-          </button>
         </div>
       )}
 
@@ -508,7 +620,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-3 w-full">
               {/* Evet */}
               <button
-                onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setAdim("scan"); }}
+                onClick={() => { setTaramaKonusu(null); setSayfaOnaylananlar([]); setMevcutIndex(0); setOnizlemeGorsel(null); setRalRenk(""); setAdim("ral"); }}
                 className="group relative overflow-hidden rounded-3xl shadow-md active:scale-95 transition-transform"
                 style={{ background: "linear-gradient(145deg, #16a34a, #15803d)" }}>
                 <div className="flex flex-col items-center justify-center gap-2.5 py-7 px-4">
@@ -623,6 +735,44 @@ export default function Home() {
               </div>
             </div>
           </button>
+
+          {/* OneDrive — Button */}
+          {odDurum !== "success" ? (
+            <button onClick={oneDriveYukle} disabled={odDurum === "loading"}
+              className="w-full relative overflow-hidden rounded-3xl shadow-sm border-2 active:scale-95 transition-transform disabled:opacity-60"
+              style={{ borderColor: "#0078d4", background: "#fff" }}>
+              <div className="flex items-center justify-center gap-3 py-5 px-6">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                  style={{ background: "#e8f1fb" }}>
+                  {odDurum === "loading" ? (
+                    <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin"
+                      style={{ borderColor: "#0078d4", borderTopColor: "transparent" }} />
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0078d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1"/>
+                      <polyline points="16 6 12 2 8 6"/>
+                      <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                  )}
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-base leading-tight" style={{ color: "#0078d4" }}>
+                    {odDurum === "loading" ? "Yükleniyor..." : "OneDrive'a Kaydet"}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "#666" }}>
+                    Excel + {taramaFotolari.length} fotoğraf → WINDOFORM/Uretim
+                  </p>
+                </div>
+              </div>
+            </button>
+          ) : (
+            <div className="w-full rounded-3xl py-4 px-6 text-center text-sm font-medium text-green-700 bg-green-50 border border-green-200">
+              {odMesaj}
+            </div>
+          )}
+          {odDurum === "error" && odMesaj && (
+            <div className="text-xs text-red-600 text-center px-2">{odMesaj}</div>
+          )}
 
           {/* Yeni Fiş — weißer Button */}
           <button onClick={yenidenBaslat}
