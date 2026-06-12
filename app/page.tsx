@@ -258,6 +258,11 @@ export default function Home() {
     if (mevcutIndex + 1 < taramaKonusu!.items.length) setMevcutIndex(mevcutIndex + 1);
     else { setTumOnaylananlar(prev => [...prev, ...g]); gidim("more_pages"); }
   }
+  function oncekiUrun() {
+    if (mevcutIndex === 0) return;
+    setSayfaOnaylananlar(prev => prev.slice(0, -1));
+    setMevcutIndex(mevcutIndex - 1);
+  }
   function stokAramaGuncelle(q: string) {
     setStokArama(q);
     setStokOneriler(q.length >= 1 ? findMatches(q, stokData, 50) : []);
@@ -679,6 +684,16 @@ export default function Home() {
           )}
 
           {!duzenlemeAcik && (
+            <div className="space-y-2">
+            {mevcutIndex > 0 && (
+              <button onClick={oncekiUrun}
+                className="flex items-center gap-1.5 text-gray-400 text-sm font-medium py-1 active:opacity-60 transition-opacity">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Önceki ürün
+              </button>
+            )}
             <div className="grid grid-cols-2 gap-3">
               {/* ATLA — weißer Premium-Button */}
               <button onClick={atla}
@@ -708,6 +723,7 @@ export default function Home() {
                   <span className="font-bold text-white text-base">Onayla</span>
                 </div>
               </button>
+            </div>
             </div>
           )}
         </div>
