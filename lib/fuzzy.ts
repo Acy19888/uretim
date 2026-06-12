@@ -1,5 +1,20 @@
 import type { StokItem } from "./types";
 
+/**
+ * Bigram benzerliği — yazım hatalarını tolere eder.
+ * "BERLGRAT" ↔ "BELGIRAT" → ~0.57 (eşik: 0.5)
+ */
+function bigramSim(a: string, b: string): number {
+  if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+  const bigramsA = new Set<string>();
+  for (let i = 0; i < a.length - 1; i++) bigramsA.add(a.slice(i, i + 2));
+  let hits = 0;
+  for (let i = 0; i < b.length - 1; i++) {
+    if (bigramsA.has(b.slice(i, i + 2))) hits++;
+  }
+  return (2 * hits) / (a.length + b.length - 2);
+}
+
 // Normalize Turkish characters for comparison
 export function normalize(str: string): string {
   return str
@@ -42,6 +57,11 @@ function scoreMatch(query: string, stokAdi: string, stokKodu: string): number {
       if (st === qt)                                    s = qt.length * 3;
       else if (st.startsWith(qt) || qt.startsWith(st)) s = Math.min(qt.length, st.length) * 2;
       else if (st.includes(qt) || qt.includes(st))     s = Math.min(qt.length, st.length);
+      else if (qt.length >= 4 && st.length >= 4) {
+        // Yazım hatası toleransı: bigram benzerliği ≥ 0.5
+        const sim = bigramSim(qt, st);
+        if (sim >= 0.5) s = Math.min(qt.length, st.length) * sim * 1.5;
+      }
       if (s > bestForToken) bestForToken = s;
     }
     if (bestForToken > 0) matchedTokenCount++;
