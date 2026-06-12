@@ -38,9 +38,26 @@ Tüm bilgileri çıkar ve JSON formatında döndür.
 - "TOP. MİK." sütununda zaten toplam yazılıysa onu kullan
 - Aksi hâlde tüm miktar sütunlarını kendin topla
 
+**Kısaltmalar — Ürün Adında Geçen Harfler:**
+- Ürün adının sonunda tek başına **E** → **Erkek** (örn: "WC geniş Ayna E" → "WC geniş Ayna Erkek")
+- Ürün adının sonunda tek başına **D** → **Dişi** (örn: "WC geniş Ayna D" → "WC geniş Ayna Disi")
+- **HBSB** veya benzer yazım (HB5B vb.) → **Hebe Schiebe**
+
+**Tekrarlama İşareti (Ditto / " " ") ÇOK ÖNEMLİ:**
+- Bazen bir satırda ürün adı yerine tırnak işareti veya ditto işareti yazılır: `"`, `''`, `,,` veya birden fazla `" " "`
+- Bu işaret "yukarıdaki satırın aynısı" anlamına gelir
+- O satırın ürün adını bir üstteki satırla aynı yap — ama miktar ve varsa ek kelime (sol/sağ, iç/dış vb.) farklı olabilir
+- Örnek:
+  - Satır 1: "Atlas kıvrık kol sol" → 800
+  - Satır 2: `" " "` sağ → 600
+  - Sonuç: Satır 2 = "Atlas kıvrık kol sağ", miktar 600
+- Ditto satırında ek bir kelime varsa (sol/sağ/iç/dış/büyük/küçük vb.) → onu ürün adına ekle
+- Ditto işareti sadece ürün adı için geçerlidir; miktar her zaman o satırda yazılı değerdir
+
 **Diğer Kurallar:**
 - Tüm doldurulmuş satırları oku
 - Boş satırları atla
+- Üzeri çizili satırları atla (iptal edilmiş)
 - El yazısı okunması zor olabilir - elinden gelenin en iyisini yap
 
 YALNIZCA şu JSON formatında yanıt ver (önünde/arkasında Markdown veya metin olmasın):

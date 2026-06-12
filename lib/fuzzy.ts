@@ -35,6 +35,9 @@ export function kisaltmaAc(text: string): string {
   }
   // Pattern: HB?B — handles typos like HB5B, HBXB, HBAB etc. → Hebe Schiebe
   result = result.replace(/\bHB.B\b/gi, "Hebe Schiebe");
+  // E / D am Ende → Erkek / Disi (nur als letztes Wort, sonst zu viele Fehlmatches)
+  result = result.replace(/\bE$/i, "Erkek");
+  result = result.replace(/\bD$/i, "Disi");
   return result;
 }
 
